@@ -1,11 +1,18 @@
+from django.http import Http404
+from django.shortcuts import render, get_object_or_404
 
-from .serializers import StudentSerializer, EmployeeSerializer
-from students.models import Student
-from employees.models import Employee
+from rest_framework import status, generics, mixins, viewsets
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from rest_framework import status
 from rest_framework.views import APIView
+
+from students.models import Student
+from employees.models import Employee
+from .serializers import StudentSerializer, EmployeeSerializer
+
+from blogs.models import Blog, Comment
+from blogs.serializers import BlogSerializer, CommentSerializer
+# from blogs.paginations import CustomPagination
 
 # Type-01: Function-Based Views here ------------------
 
@@ -135,22 +142,66 @@ class EmployeeDetail(generics.RetrieveUpdateDestroyAPIView):
     lookup_field = 'pk'
 """
 
+
 # Tyoe-05: ViewSets ----------------
 
+"""
+class EmployeeViewset(viewsets.ModelViewSet):
+    def list(self, request):
+        queryset = Employee.objects.all()
+        serializer = EmployeeSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
+    def create(self, request):
+        serializer = EmployeeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    def retrieve(self, request, pk=None):
+        # queryset = Employee.objects.all()
+        employee = get_object_or_404(Employee, pk=pk)
+        serializer = EmployeeSerializer(employee)
+        return Response(serializer.data)
+    
+    def update(self, request, pk=None):
+        employee = get_object_or_404(Employee, pk=pk)
+        serializer = EmployeeSerializer(employee, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+    
+    def delete(self, request, pk=None):
+        employee = get_object_or_404(Employee, pk=pk)
+        employee.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+"""
 
+# Type-06: ViewModels --------------
 
-
-
-
-
-
-
-
-# The Most Out-dated: JSON-Response Based Views ----------------
-
-""" 
-    students = Student.objects.all()
-    students_list = list(students.values())
-    return JsonResponse(students_list, safe=False)
+class EmployeeViewset(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer 
     
 """
+class EmployeeViewset(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer            # this 2 lines of code will handle all pk-based or non-pk-based operations automatically
+    lookup_field = 'pk'                              # default is 'id', but we can change it
+
+    NB: The lookup_field = 'pk' is redundant because pk is the default value for ModelViewSet.
+    You only need to specify lookup_field if you're using a different field (e.g., slug or uuid) for lookups.
+    If you're using the default primary key, you can omit this line.
+
+"""
+
+
+class BlogsViewset(viewsets.ModelViewSet):
+    queryset = Blog.objects.all()
+    serializer_class = BlogSerializer
+
+class CommentViewset(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
