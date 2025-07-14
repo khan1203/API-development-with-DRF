@@ -12,7 +12,7 @@ from .serializers import StudentSerializer, EmployeeSerializer
 
 from blogs.models import Blog, Comment
 from blogs.serializers import BlogSerializer, CommentSerializer
-# from blogs.paginations import CustomPagination
+from .paginations import CustomPagination
 
 # Type-01: Function-Based Views here ------------------
 
@@ -183,7 +183,8 @@ class EmployeeViewset(viewsets.ModelViewSet):
 
 class EmployeeViewset(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
-    serializer_class = EmployeeSerializer 
+    serializer_class = EmployeeSerializer
+    pagination_class = CustomPagination
     
 """
 class EmployeeViewset(viewsets.ModelViewSet):
